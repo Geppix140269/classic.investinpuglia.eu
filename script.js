@@ -34,7 +34,7 @@ window.addEventListener('load', function() {
   const userEmail = localStorage.getItem('investiscope_user_email');
   
   if (!accessToken || !userEmail) {
-    window.location.href = 'https://investinpuglia.eu/classic/register';
+    window.location.href = 'https://investinpuglia.eu/register';
     return;
   }
   
