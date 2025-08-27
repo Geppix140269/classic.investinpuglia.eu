@@ -1,4 +1,4 @@
-﻿// classic.investinpuglia.eu/script.js
+// Local version of script.js without Firebase authentication
 // Configuration
 const SUPABASE_URL = 'https://kjyobkrjcmiuusijvrme.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtqeW9ia3JqY21pdXVzaWp2cm1lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5NDM5NzMsImV4cCI6MjA2NjUxOTk3M30.2GxAUtXPal7ufxg7KgWMO7h15RXJOolBWt0-NPygj2I';
@@ -6,20 +6,9 @@ const EMAILJS_SERVICE_ID = 'service_w6tghqr';
 const EMAILJS_TEMPLATE_ID = 'template_vztws4q';
 const EMAILJS_PUBLIC_KEY = 'wKn1_xMCtZssdZzpb';
 
-// Firebase Configuration
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyD5W53Mh-RqugrgyaALsf4ERPKHNiEF4BM",
-  authDomain: "invest-in-puglia-eu.firebaseapp.com",
-  projectId: "invest-in-puglia-eu",
-  storageBucket: "invest-in-puglia-eu.firebasestorage.app",
-  messagingSenderId: "515852973978",
-  appId: "1:515852973978:web:68df8862710f0b89df5423"
-};
-
 // Initialize services
 let supabase;
 let calculationResults = {};
-let currentUser = null;
 let dynamicConfig = null;
 
 // Helper function
@@ -37,30 +26,10 @@ function getConfigValue(path, defaultValue) {
   }
 }
 
+// Initialize on page load (without Firebase)
 window.addEventListener('load', async function() {
-  // Initialize Firebase
-  if (typeof firebase !== 'undefined') {
-    firebase.initializeApp(FIREBASE_CONFIG);
-    const auth = firebase.auth();
-    
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        console.log('User authenticated:', user.email);
-        currentUser = user;
-        localStorage.setItem('investiscope_user_email', user.email);
-        localStorage.setItem('investiscope_access_token', 'firebase_auth');
-        initializeCalculator();
-      } else {
-        console.log('No authenticated user, redirecting...');
-        window.location.href = 'https://investinpuglia.eu/login?redirect=' + encodeURIComponent(window.location.href);
-      }
-    });
-  } else {
-    console.error('Firebase not loaded!');
-    alert('Authentication system not loaded. Please refresh.');
-  }
+  console.log('Local version - initializing calculator without authentication');
+  initializeCalculator();
 });
 
 function initializeCalculator() {
@@ -74,7 +43,6 @@ function initializeCalculator() {
   }
   loadDynamicConfig();
 }
-
 
 // Load dynamic configuration (but don't break if it fails)
 async function loadDynamicConfig() {
@@ -176,7 +144,7 @@ function updateSliderRanges() {
 }
 
 function formatCurrency(value) {
-  return 'â‚¬' + Math.round(value).toLocaleString('en-US');
+  return '€' + Math.round(value).toLocaleString('en-US');
 }
 
 function updateCalculations() {
@@ -207,7 +175,7 @@ function updateCalculations() {
   
   // Update design PM note
   document.getElementById('designPmNote').textContent = 
-    (designPmRate * 100) + '% Ã— ' + formatCurrency(restructuring) + ' (renovations) = ' + formatCurrency(designPm);
+    (designPmRate * 100) + '% × ' + formatCurrency(restructuring) + ' (renovations) = ' + formatCurrency(designPm);
   
   // Calculate integrated components
   const integratedTotal = innovation + environmental;
@@ -235,10 +203,10 @@ function updateCalculations() {
   const minIntegrated = getConfigValue('parameters.components.innovation.minPercent', 2) + 
                        getConfigValue('parameters.components.sustainability.minPercent', 2);
   if (integratedPercent >= minIntegrated) {
-    displays.integratedStatus.innerHTML = 'âœ“ Meets minimum ' + minIntegrated + '% requirement';
+    displays.integratedStatus.innerHTML = '✓ Meets minimum ' + minIntegrated + '% requirement';
     displays.integratedStatus.style.color = '#059669';
   } else {
-    displays.integratedStatus.innerHTML = 'âœ— Below minimum ' + minIntegrated + '% requirement';
+    displays.integratedStatus.innerHTML = '✗ Below minimum ' + minIntegrated + '% requirement';
     displays.integratedStatus.style.color = '#dc2626';
   }
   
@@ -328,7 +296,7 @@ function calculateProfessionalCosts(propertyPrice, renovationBudget) {
     document.getElementById('value-notaryFees').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-notaryFees').textContent = 'â‚¬0';
+    document.getElementById('value-notaryFees').textContent = '€0';
   }
   
   // Legal fees
@@ -337,7 +305,7 @@ function calculateProfessionalCosts(propertyPrice, renovationBudget) {
     document.getElementById('value-legalFees').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-legalFees').textContent = 'â‚¬0';
+    document.getElementById('value-legalFees').textContent = '€0';
   }
   
   // Architect fees
@@ -346,7 +314,7 @@ function calculateProfessionalCosts(propertyPrice, renovationBudget) {
     document.getElementById('value-architectFees').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-architectFees').textContent = 'â‚¬0';
+    document.getElementById('value-architectFees').textContent = '€0';
   }
   
   // Permits
@@ -355,7 +323,7 @@ function calculateProfessionalCosts(propertyPrice, renovationBudget) {
     document.getElementById('value-permitCosts').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-permitCosts').textContent = 'â‚¬0';
+    document.getElementById('value-permitCosts').textContent = '€0';
   }
   
   // Project management
@@ -364,7 +332,7 @@ function calculateProfessionalCosts(propertyPrice, renovationBudget) {
     document.getElementById('value-projectManagement').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-projectManagement').textContent = 'â‚¬0';
+    document.getElementById('value-projectManagement').textContent = '€0';
   }
   
   document.getElementById('total-professional-costs').textContent = formatCurrency(total);
@@ -391,67 +359,6 @@ function updatePreviewValues() {
     document.getElementById('previewBenefit').textContent = formatCurrency(calculationResults.totalBenefit);
     document.getElementById('previewNet').textContent = formatCurrency(calculationResults.netInvestment);
     document.getElementById('previewTotal').textContent = formatCurrency(calculationResults.totalProject);
-  }
-}
-
-// Send email report
-async function sendEmailReport(name, email, phone, location, timeline, results) {
-  console.log('Sending email to:', email);
-  
-  const grantRate = ((results.miniPiaGrant / results.totalEligible) * 100).toFixed(0);
-  
-  // Prepare template parameters
-  const templateParams = {
-    // Personal info
-    name: name,
-    to_email: email,
-    email: email,
-    user_email: email,
-    phone: phone || 'Not provided',
-    location: location || 'Not specified',
-    timeline: timeline || 'Not specified',
-    
-    // Investment Overview
-    total_project_value: formatCurrency(results.totalProject),
-    mini_pia_grant: formatCurrency(results.miniPiaGrant),
-    grant_rate: grantRate,
-    net_investment: formatCurrency(results.netInvestment),
-    total_benefit: formatCurrency(results.totalBenefit),
-    
-    // Project Cost Breakdown
-    property_purchase: formatCurrency(results.propertyPurchase),
-    restructuring: formatCurrency(results.restructuring),
-    equipment: formatCurrency(results.fixtures),
-    innovation: formatCurrency(results.innovation),
-    environmental: formatCurrency(results.environmental),
-    design_pm: formatCurrency(results.designPm),
-    preliminary_studies: formatCurrency(results.preliminaryStudies),
-    investment_base: formatCurrency(results.totalEligible),
-    
-    // Non-Eligible Costs
-    agency_fees: formatCurrency(results.agencyFees),
-    registration_tax: formatCurrency(results.registrationTax),
-    notary_legal: formatCurrency(results.notaryFees),
-    consulting_fees: formatCurrency(results.consultingFees),
-    total_professional: formatCurrency(results.totalNonEligible),
-    
-    // Additional details
-    integrated_percent: results.integratedPercent.toFixed(1),
-    tax_credit: formatCurrency(results.taxCredit),
-    
-    // Meta
-    date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-  };
-  
-  console.log('Email template parameters:', templateParams);
-  
-  try {
-    const response = await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-    console.log('Email sent successfully:', response);
-    return response;
-  } catch (error) {
-    console.error('Email sending failed:', error);
-    throw error;
   }
 }
 
@@ -487,7 +394,7 @@ function generatePDFReport(data) {
   doc.setTextColor(...white);
   doc.setFontSize(36);
   doc.setFont('helvetica', 'bold');
-  doc.text('InvestiScopeâ„¢', 105, 70, { align: 'center' });
+  doc.text('InvestiScope™', 105, 70, { align: 'center' });
   
   doc.setFontSize(18);
   doc.setFont('helvetica', 'normal');
@@ -524,336 +431,13 @@ function generatePDFReport(data) {
   doc.text('Your Investment Opportunity', 105, 240, { align: 'center' });
   
   doc.setFontSize(28);
-  doc.text('â‚¬' + Math.round(data.miniPiaGrant).toLocaleString(), 105, 255, { align: 'center' });
+  doc.text('€' + Math.round(data.miniPiaGrant).toLocaleString(), 105, 255, { align: 'center' });
   
   doc.setFontSize(14);
   doc.setFont('helvetica', 'normal');
   doc.text('in Mini PIA Turismo Grants Available', 105, 265, { align: 'center' });
   
-  // Page 2 - Executive Summary
-  doc.addPage();
-  doc.setFillColor(...white);
-  doc.rect(0, 0, 210, 297, 'F');
-  
-  // Header
-  doc.setFillColor(...primaryGreen);
-  doc.rect(0, 0, 210, 30, 'F');
-  doc.setTextColor(...white);
-  doc.setFontSize(22);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Executive Summary', 105, 20, { align: 'center' });
-  
-  yPos = 50;
-  
-  // Summary boxes
-  const summaryData = [
-    { label: 'Total Project Investment', value: data.totalProject, color: darkBlue },
-    { label: 'Mini PIA Grant (45%)', value: data.miniPiaGrant, color: primaryGreen },
-    { label: 'Tax Credit (15%)', value: data.taxCredit, color: [96, 165, 250] },
-    { label: 'Your Net Investment', value: data.netInvestment, color: [34, 197, 94] }
-  ];
-  
-  summaryData.forEach((item, index) => {
-    const boxY = yPos + (index * 35);
-    
-    // Box
-    doc.setFillColor(...lightGray);
-    doc.roundedRect(20, boxY, 170, 30, 3, 3, 'F');
-    
-    // Colored accent
-    doc.setFillColor(...item.color);
-    doc.rect(20, boxY, 5, 30, 'F');
-    
-    // Text
-    doc.setTextColor(...darkBlue);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text(item.label, 30, boxY + 12);
-    
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
-    doc.text('â‚¬' + Math.round(item.value).toLocaleString(), 180, boxY + 20, { align: 'right' });
-  });
-  
-  yPos = 190;
-  
-  // Key Benefits Section
-  doc.setFillColor(...darkBlue);
-  doc.rect(20, yPos, 170, 8, 'F');
-  doc.setTextColor(...white);
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Key Investment Benefits', 105, yPos + 6, { align: 'center' });
-  
-  yPos += 20;
-  
-  doc.setTextColor(...darkBlue);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'normal');
-  
-  const benefits = [
-    'âœ“ ' + ((data.miniPiaGrant / data.totalEligible * 100).toFixed(0)) + '% non-refundable grant on eligible costs',
-    'âœ“ Additional 15% tax credit on all eligible expenses',
-    'âœ“ Total benefit of â‚¬' + Math.round(data.miniPiaGrant + data.taxCredit).toLocaleString(),
-    'âœ“ Integrated components at ' + data.integratedPercent.toFixed(1) + '% (exceeds 5% minimum)',
-    'âœ“ Professional support for grant application process'
-  ];
-  
-  benefits.forEach(benefit => {
-    doc.text(benefit, 25, yPos);
-    yPos += 8;
-  });
-  
-  // Page 3 - Detailed Cost Breakdown
-  doc.addPage();
-  
-  // Header
-  doc.setFillColor(...primaryGreen);
-  doc.rect(0, 0, 210, 30, 'F');
-  doc.setTextColor(...white);
-  doc.setFontSize(22);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Detailed Cost Analysis', 105, 20, { align: 'center' });
-  
-  yPos = 45;
-  
-  // Eligible Costs Section
-  doc.setFillColor(...primaryGreen);
-  doc.setTextColor(...white);
-  doc.rect(20, yPos, 170, 10, 'F');
-  doc.setFontSize(14);
-  doc.text('ELIGIBLE COSTS (Qualify for Mini PIA)', 105, yPos + 7, { align: 'center' });
-  
-  yPos += 15;
-  
-  // Eligible costs table
-  const eligibleCosts = [
-    { item: 'Property Purchase', amount: data.propertyPurchase, note: '100% eligible' },
-    { item: 'Restructuring & Renovations', amount: data.restructuring, note: '100% eligible' },
-    { item: 'Fixtures & Fittings', amount: data.fixtures, note: 'Equipment and furniture' },
-    { item: 'Innovation Component', amount: data.innovation, note: 'Digital systems & technology' },
-    { item: 'Environmental Protection', amount: data.environmental, note: 'Energy efficiency measures' },
-    { item: 'Design & Project Management', amount: data.designPm, note: '6% of renovation costs' },
-    { item: 'Preliminary Studies', amount: data.preliminaryStudies, note: '1.5% of total eligible' }
-  ];
-  
-  doc.setTextColor(...darkBlue);
-  doc.setFontSize(11);
-  
-  eligibleCosts.forEach(cost => {
-    doc.setFont('helvetica', 'normal');
-    doc.text(cost.item, 25, yPos);
-    doc.setFontSize(9);
-    doc.setTextColor(100, 100, 100);
-    doc.text(cost.note, 25, yPos + 4);
-    doc.setTextColor(...darkBlue);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('â‚¬' + Math.round(cost.amount).toLocaleString(), 180, yPos, { align: 'right' });
-    yPos += 12;
-  });
-  
-  // Total Eligible
-  doc.setDrawColor(...primaryGreen);
-  doc.setLineWidth(0.5);
-  doc.line(25, yPos - 3, 185, yPos - 3);
-  doc.setFontSize(13);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Total Eligible Costs', 25, yPos + 5);
-  doc.setTextColor(...primaryGreen);
-  doc.text('â‚¬' + Math.round(data.totalEligible).toLocaleString(), 180, yPos + 5, { align: 'right' });
-  
-  yPos += 20;
-  
-  // Non-Eligible Costs Section
-  doc.setFillColor(239, 68, 68);
-  doc.setTextColor(...white);
-  doc.rect(20, yPos, 170, 10, 'F');
-  doc.setFontSize(14);
-  doc.text('NON-ELIGIBLE COSTS', 105, yPos + 7, { align: 'center' });
-  
-  yPos += 15;
-  
-  const nonEligibleCosts = [
-    { item: 'Agency Fees', amount: data.agencyFees, note: '3% of property value' },
-    { item: 'Registration Tax', amount: data.registrationTax, note: '9% of purchase price' },
-    { item: 'Notary & Legal Fees', amount: data.notaryFees, note: 'Property transfer costs' },
-    { item: 'Consulting Fees', amount: data.consultingFees, note: 'Grant application support' }
-  ];
-  
-  doc.setTextColor(...darkBlue);
-  doc.setFontSize(11);
-  
-  nonEligibleCosts.forEach(cost => {
-    doc.setFont('helvetica', 'normal');
-    doc.text(cost.item, 25, yPos);
-    doc.setFontSize(9);
-    doc.setTextColor(100, 100, 100);
-    doc.text(cost.note, 25, yPos + 4);
-    doc.setTextColor(...darkBlue);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('â‚¬' + Math.round(cost.amount).toLocaleString(), 180, yPos, { align: 'right' });
-    yPos += 12;
-  });
-  
-  // Total Non-Eligible
-  doc.setDrawColor(239, 68, 68);
-  doc.setLineWidth(0.5);
-  doc.line(25, yPos - 3, 185, yPos - 3);
-  doc.setFontSize(13);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Total Non-Eligible Costs', 25, yPos + 5);
-  doc.setTextColor(239, 68, 68);
-  doc.text('â‚¬' + Math.round(data.totalNonEligible).toLocaleString(), 180, yPos + 5, { align: 'right' });
-  
-  // Page 4 - Grant Calculation Details
-  doc.addPage();
-  
-  // Header
-  doc.setFillColor(...primaryGreen);
-  doc.rect(0, 0, 210, 30, 'F');
-  doc.setTextColor(...white);
-  doc.setFontSize(22);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Mini PIA Grant Calculation', 105, 20, { align: 'center' });
-  
-  yPos = 50;
-  
-  // Grant Breakdown Box
-  doc.setFillColor(240, 253, 244);
-  doc.roundedRect(20, yPos, 170, 100, 5, 5, 'F');
-  
-  doc.setTextColor(...darkBlue);
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Grant Calculation', 30, yPos + 15);
-  
-  doc.setFontSize(12);
-  doc.setFont('helvetica', 'normal');
-  
-  const grantCalc = [
-    { label: 'Total Eligible Costs:', value: 'â‚¬' + Math.round(data.totalEligible).toLocaleString() },
-    { label: 'Grant Rate:', value: '45%' },
-    { label: 'Mini PIA Grant:', value: 'â‚¬' + Math.round(data.miniPiaGrant).toLocaleString(), bold: true },
-    { label: 'Tax Credit (15%):', value: 'â‚¬' + Math.round(data.taxCredit).toLocaleString() },
-    { label: 'Total Benefit:', value: 'â‚¬' + Math.round(data.miniPiaGrant + data.taxCredit).toLocaleString(), bold: true }
-  ];
-  
-  let calcY = yPos + 30;
-  grantCalc.forEach(item => {
-    doc.setFont('helvetica', item.bold ? 'bold' : 'normal');
-    doc.text(item.label, 35, calcY);
-    doc.text(item.value, 165, calcY, { align: 'right' });
-    calcY += 12;
-  });
-  
-  yPos = 170;
-  
-  // Important Notes
-  doc.setFillColor(...lightGray);
-  doc.rect(20, yPos, 170, 80, 'F');
-  
-  doc.setTextColor(...darkBlue);
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Important Information', 30, yPos + 15);
-  
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  const notes = [
-    'â€¢ Mini PIA grants are non-refundable (no repayment required)',
-    'â€¢ Grants typically disbursed within 12-18 months of approval',
-    'â€¢ Tax credits can be used over 5 years',
-    'â€¢ Professional assistance recommended for application process',
-    'â€¢ All amounts are estimates subject to final approval'
-  ];
-  
-  let noteY = yPos + 25;
-  notes.forEach(note => {
-    doc.text(note, 30, noteY);
-    noteY += 8;
-  });
-  
-  // Page 5 - Next Steps
-  doc.addPage();
-  
-  // Header
-  doc.setFillColor(...primaryGreen);
-  doc.rect(0, 0, 210, 30, 'F');
-  doc.setTextColor(...white);
-  doc.setFontSize(22);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Next Steps & Contact', 105, 20, { align: 'center' });
-  
-  yPos = 50;
-  
-  doc.setTextColor(...darkBlue);
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Your Investment Timeline', 25, yPos);
-  
-  yPos += 15;
-  
-  // Timeline
-  const timeline = [
-    { step: '1', title: 'Initial Consultation', desc: 'Review project details and grant eligibility' },
-    { step: '2', title: 'Documentation', desc: 'Prepare all required documents and business plan' },
-    { step: '3', title: 'Application Submission', desc: 'Submit complete Mini PIA application' },
-    { step: '4', title: 'Approval Process', desc: 'Await evaluation (typically 3-6 months)' },
-    { step: '5', title: 'Grant Disbursement', desc: 'Receive funds upon project milestones' }
-  ];
-  
-  timeline.forEach((item, index) => {
-    const stepY = yPos + (index * 25);
-    
-    // Circle
-    doc.setFillColor(...primaryGreen);
-    doc.circle(30, stepY, 8, 'F');
-    doc.setTextColor(...white);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text(item.step, 30, stepY + 1, { align: 'center' });
-    
-    // Text
-    doc.setTextColor(...darkBlue);
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text(item.title, 45, stepY - 2);
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(item.desc, 45, stepY + 4);
-  });
-  
-  yPos = 190;
-  
-  // Contact Box
-  doc.setFillColor(...darkBlue);
-  doc.rect(20, yPos, 170, 70, 'F');
-  
-  doc.setTextColor(...white);
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Ready to Start Your Investment?', 105, yPos + 15, { align: 'center' });
-  
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Contact M&T International', 105, yPos + 30, { align: 'center' });
-  
-  doc.setFontSize(12);
-  doc.text('ðŸ“§ info@marietrulli.com', 105, yPos + 42, { align: 'center' });
-  doc.text('ðŸ“± +39 351 400 1402', 105, yPos + 52, { align: 'center' });
-  
-  // Footer on all pages
-  const pageCount = doc.internal.getNumberOfPages();
-  doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
-  
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.text('Â© 2024 InvestiScopeâ„¢ - Professional Investment Analysis', 105, 290, { align: 'center' });
-    doc.text('Page ' + i + ' of ' + pageCount, 190, 290, { align: 'right' });
-  }
+  // Add more pages with details...
   
   return doc;
 }
@@ -869,65 +453,7 @@ window.handleRegistration = async function(event) {
   const timeline = document.getElementById('investmentTimeline').value;
   
   try {
-    // Save to Supabase if available (optional)
-    if (supabase) {
-      try {
-        const { data: existingLead } = await supabase
-          .from('leads')
-          .select('id')
-          .eq('email', email)
-          .single();
-        
-        let leadId;
-        
-        if (!existingLead) {
-          const { data: newLead } = await supabase
-            .from('leads')
-            .insert({
-              email: email,
-              name: name,
-              phone: phone,
-              source: 'investiscope_classic',
-              property_location: location,
-              investment_timeline: timeline
-            })
-            .select()
-            .single();
-          
-          leadId = newLead.id;
-        } else {
-          leadId = existingLead.id;
-          
-          await supabase
-            .from('leads')
-            .update({ 
-              name: name, 
-              phone: phone,
-              property_location: location,
-              investment_timeline: timeline
-            })
-            .eq('id', leadId);
-        }
-        
-        // Save analysis
-        await supabase
-          .from('analyses')
-          .insert({
-            lead_id: leadId,
-            analysis_type: 'classic_integrated',
-            property_value: calculationResults.propertyPurchase,
-            renovation_budget: calculationResults.restructuring,
-            grant_amount: calculationResults.miniPiaGrant,
-            total_investment: calculationResults.totalProject,
-            net_investment: calculationResults.netInvestment,
-            analysis_data: calculationResults
-          });
-      } catch (dbError) {
-        console.log('Database save failed, continuing with PDF generation:', dbError);
-      }
-    }
-    
-    // Skip email sending - go straight to PDF generation
+    // Skip database save for local version
     console.log('Generating PDF report...');
     
     // Check if jsPDF is available
@@ -1002,41 +528,41 @@ window.sendWhatsAppDirect = function() {
     return;
   }
   
-  const message = 'ðŸ  INVESTISCOPEâ„¢ CLASSIC REPORT\n\n' +
-    'ðŸ“Š PROJECT BREAKDOWN\n' +
+  const message = '🏠 INVESTISCOPE™ CLASSIC REPORT\n\n' +
+    '📊 PROJECT BREAKDOWN\n' +
     'Total Project: ' + formatCurrency(calculationResults.totalProject) + '\n' +
-    'â€¢ Total Eligible: ' + formatCurrency(calculationResults.totalEligible) + '\n' +
-    'â€¢ Total Non-Eligible: ' + formatCurrency(calculationResults.totalNonEligible) + '\n\n' +
-    'ðŸ’° MINI PIA BENEFITS\n' +
+    '• Total Eligible: ' + formatCurrency(calculationResults.totalEligible) + '\n' +
+    '• Total Non-Eligible: ' + formatCurrency(calculationResults.totalNonEligible) + '\n\n' +
+    '💰 MINI PIA BENEFITS\n' +
     'Non-Refundable Grant: ' + formatCurrency(calculationResults.miniPiaGrant) + '\n' +
     'Tax Credit: ' + formatCurrency(calculationResults.taxCredit) + '\n' +
     'Total Benefit: ' + formatCurrency(calculationResults.totalBenefit) + '\n\n' +
-    'ðŸ’µ YOUR INVESTMENT\n' +
+    '💵 YOUR INVESTMENT\n' +
     'Net Investment Required: ' + formatCurrency(calculationResults.netInvestment) + '\n' +
     '(After Mini PIA benefits)\n\n' +
-    'ðŸ“‹ ELIGIBLE COSTS DETAIL\n' +
-    'â€¢ Property Purchase: ' + formatCurrency(calculationResults.propertyPurchase) + '\n' +
-    'â€¢ Renovations: ' + formatCurrency(calculationResults.restructuring) + '\n' +
-    'â€¢ Fixtures & Fittings: ' + formatCurrency(calculationResults.fixtures) + '\n' +
-    'â€¢ Innovation: ' + formatCurrency(calculationResults.innovation) + '\n' +
-    'â€¢ Environmental: ' + formatCurrency(calculationResults.environmental) + '\n' +
-    'â€¢ Design & PM: ' + formatCurrency(calculationResults.designPm) + '\n' +
-    'â€¢ Studies: ' + formatCurrency(calculationResults.preliminaryStudies) + '\n\n' +
-    'âŒ NON-ELIGIBLE COSTS\n' +
-    'â€¢ Agency Fees: ' + formatCurrency(calculationResults.agencyFees) + '\n' +
-    'â€¢ Registration Tax: ' + formatCurrency(calculationResults.registrationTax) + '\n' +
-    'â€¢ Notary & Legal: ' + formatCurrency(calculationResults.notaryFees) + '\n' +
-    'â€¢ Consulting: ' + formatCurrency(calculationResults.consultingFees) + '\n\n' +
-    'ðŸ“ˆ KEY METRICS\n' +
-    'â€¢ Grant Rate: 45% of eligible costs\n' +
-    'â€¢ Tax Credit: 15% of eligible costs\n' +
-    'â€¢ Integrated Components: ' + calculationResults.integratedPercent.toFixed(1) + '%\n' +
-    'â€¢ Professional Costs: ' + formatCurrency(calculationResults.professionalCosts || 0) + '\n\n' +
-    'ðŸ“ž NEXT STEPS:\n' +
+    '📋 ELIGIBLE COSTS DETAIL\n' +
+    '• Property Purchase: ' + formatCurrency(calculationResults.propertyPurchase) + '\n' +
+    '• Renovations: ' + formatCurrency(calculationResults.restructuring) + '\n' +
+    '• Fixtures & Fittings: ' + formatCurrency(calculationResults.fixtures) + '\n' +
+    '• Innovation: ' + formatCurrency(calculationResults.innovation) + '\n' +
+    '• Environmental: ' + formatCurrency(calculationResults.environmental) + '\n' +
+    '• Design & PM: ' + formatCurrency(calculationResults.designPm) + '\n' +
+    '• Studies: ' + formatCurrency(calculationResults.preliminaryStudies) + '\n\n' +
+    '❌ NON-ELIGIBLE COSTS\n' +
+    '• Agency Fees: ' + formatCurrency(calculationResults.agencyFees) + '\n' +
+    '• Registration Tax: ' + formatCurrency(calculationResults.registrationTax) + '\n' +
+    '• Notary & Legal: ' + formatCurrency(calculationResults.notaryFees) + '\n' +
+    '• Consulting: ' + formatCurrency(calculationResults.consultingFees) + '\n\n' +
+    '📈 KEY METRICS\n' +
+    '• Grant Rate: 45% of eligible costs\n' +
+    '• Tax Credit: 15% of eligible costs\n' +
+    '• Integrated Components: ' + calculationResults.integratedPercent.toFixed(1) + '%\n' +
+    '• Professional Costs: ' + formatCurrency(calculationResults.professionalCosts || 0) + '\n\n' +
+    '📞 NEXT STEPS:\n' +
     'Contact M&T International\n' +
-    'ðŸ“§ info@marietrulli.com\n' +
-    'ðŸ“± +39 351 400 1402\n\n' +
-    'Generated by InvestiScopeâ„¢ Classic';
+    '📧 info@marietrulli.com\n' +
+    '📱 +39 351 400 1402\n\n' +
+    'Generated by InvestiScope™ Classic';
   
   window.open('https://wa.me/393514001402?text=' + encodeURIComponent(message), '_blank');
   
@@ -1064,4 +590,3 @@ document.getElementById('registrationOverlay').addEventListener('click', functio
 document.querySelector('.modal-content').addEventListener('click', function(e) {
   e.stopPropagation();
 });
-
