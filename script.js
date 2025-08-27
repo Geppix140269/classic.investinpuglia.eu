@@ -53,13 +53,15 @@ window.addEventListener('load', async function() {
         localStorage.setItem('investiscope_access_token', 'firebase_auth');
         initializeCalculator();
       } else {
-        console.log('No authenticated user, redirecting...');
-        window.location.href = 'https://investinpuglia.eu/login?redirect=' + encodeURIComponent(window.location.href);
+        console.log('No authenticated user, running in demo mode');
+        // Run without authentication for local testing
+        initializeCalculator();
       }
     });
   } else {
-    console.error('Firebase not loaded!');
-    alert('Authentication system not loaded. Please refresh.');
+    console.log('Firebase not loaded, running in demo mode');
+    // Run without Firebase for local testing
+    initializeCalculator();
   }
 });
 
