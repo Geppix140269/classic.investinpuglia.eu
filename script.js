@@ -37,6 +37,12 @@ function getConfigValue(path, defaultValue) {
   }
 }
 
+// Ensure proper character encoding on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Force UTF-8 encoding for dynamic content
+  document.characterSet = 'UTF-8';
+});
+
 window.addEventListener('load', async function() {
   // Initialize Firebase
   if (typeof firebase !== 'undefined') {
@@ -178,7 +184,9 @@ function updateSliderRanges() {
 }
 
 function formatCurrency(value) {
-  return '€' + Math.round(value).toLocaleString('en-US');
+  // Use HTML entity for euro symbol to ensure proper rendering
+  const euroSymbol = '\u20AC'; // Unicode for €
+  return euroSymbol + Math.round(value).toLocaleString('en-US');
 }
 
 function updateCalculations() {
@@ -208,8 +216,9 @@ function updateCalculations() {
   displays.designPm.textContent = formatCurrency(designPm);
   
   // Update design PM note
+  const multiplySymbol = '\u00D7'; // Unicode for ×
   document.getElementById('designPmNote').textContent = 
-    (designPmRate * 100) + '% × ' + formatCurrency(restructuring) + ' (renovations) = ' + formatCurrency(designPm);
+    (designPmRate * 100) + '% ' + multiplySymbol + ' ' + formatCurrency(restructuring) + ' (renovations) = ' + formatCurrency(designPm);
   
   // Calculate integrated components
   const integratedTotal = innovation + environmental;
@@ -237,10 +246,10 @@ function updateCalculations() {
   const minIntegrated = getConfigValue('parameters.components.innovation.minPercent', 2) + 
                        getConfigValue('parameters.components.sustainability.minPercent', 2);
   if (integratedPercent >= minIntegrated) {
-    displays.integratedStatus.innerHTML = '✓ Meets minimum ' + minIntegrated + '% requirement';
+    displays.integratedStatus.innerHTML = '\u2713 Meets minimum ' + minIntegrated + '% requirement'; // Unicode for ✓
     displays.integratedStatus.style.color = '#059669';
   } else {
-    displays.integratedStatus.innerHTML = '✗ Below minimum ' + minIntegrated + '% requirement';
+    displays.integratedStatus.innerHTML = '\u2717 Below minimum ' + minIntegrated + '% requirement'; // Unicode for ✗
     displays.integratedStatus.style.color = '#dc2626';
   }
   
@@ -330,7 +339,7 @@ function calculateProfessionalCosts(propertyPrice, renovationBudget) {
     document.getElementById('value-notaryFees').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-notaryFees').textContent = '€0';
+    document.getElementById('value-notaryFees').textContent = '\u20AC0';
   }
   
   // Legal fees
@@ -339,7 +348,7 @@ function calculateProfessionalCosts(propertyPrice, renovationBudget) {
     document.getElementById('value-legalFees').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-legalFees').textContent = '€0';
+    document.getElementById('value-legalFees').textContent = '\u20AC0';
   }
   
   // Architect fees
@@ -348,7 +357,7 @@ function calculateProfessionalCosts(propertyPrice, renovationBudget) {
     document.getElementById('value-architectFees').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-architectFees').textContent = '€0';
+    document.getElementById('value-architectFees').textContent = '\u20AC0';
   }
   
   // Permits
@@ -357,7 +366,7 @@ function calculateProfessionalCosts(propertyPrice, renovationBudget) {
     document.getElementById('value-permitCosts').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-permitCosts').textContent = '€0';
+    document.getElementById('value-permitCosts').textContent = '\u20AC0';
   }
   
   // Project management
@@ -366,7 +375,7 @@ function calculateProfessionalCosts(propertyPrice, renovationBudget) {
     document.getElementById('value-projectManagement').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-projectManagement').textContent = '€0';
+    document.getElementById('value-projectManagement').textContent = '\u20AC0';
   }
   
   document.getElementById('total-professional-costs').textContent = formatCurrency(total);
