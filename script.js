@@ -166,16 +166,9 @@ function updateSliderRanges() {
   }
 }
 
-// CRITICAL FIX: Create element to get proper euro symbol
-function getEuroSymbol() {
-  // Create a temporary element to decode HTML entity
-  const temp = document.createElement('div');
-  temp.innerHTML = '&euro;';
-  return temp.textContent;
-}
-
 function formatCurrency(value) {
-  return getEuroSymbol() + Math.round(value).toLocaleString('en-US');
+  // Simple solution - no euro symbol, just formatted number
+  return Math.round(value).toLocaleString('en-US');
 }
 
 function updateCalculations() {
@@ -204,13 +197,9 @@ function updateCalculations() {
   const designPm = restructuring * designPmRate;
   displays.designPm.textContent = formatCurrency(designPm);
   
-  // Update design PM note - create multiply symbol properly
-  const multiplyTemp = document.createElement('div');
-  multiplyTemp.innerHTML = '&times;';
-  const multiplySymbol = multiplyTemp.textContent;
-  
+  // Update design PM note - use simple 'x' for multiplication
   document.getElementById('designPmNote').textContent = 
-    (designPmRate * 100) + '% ' + multiplySymbol + ' ' + formatCurrency(restructuring) + ' (renovations) = ' + formatCurrency(designPm);
+    (designPmRate * 100) + '% x ' + formatCurrency(restructuring) + ' (renovations) = ' + formatCurrency(designPm);
   
   // Calculate integrated components
   const integratedTotal = innovation + environmental;
@@ -240,17 +229,11 @@ function updateCalculations() {
   const minIntegrated = getConfigValue('parameters.components.innovation.minPercent', 2) + 
                        getConfigValue('parameters.components.sustainability.minPercent', 2);
   
-  // Create checkmark and cross symbols properly
-  const checkTemp = document.createElement('div');
-  const crossTemp = document.createElement('div');
-  checkTemp.innerHTML = '&check;';
-  crossTemp.innerHTML = '&cross;';
-  
   if (integratedPercent >= minIntegrated) {
-    displays.integratedStatus.textContent = checkTemp.textContent + ' Meets minimum ' + minIntegrated + '% requirement';
+    displays.integratedStatus.textContent = 'YES - Meets minimum ' + minIntegrated + '% requirement';
     displays.integratedStatus.style.color = '#059669';
   } else {
-    displays.integratedStatus.textContent = crossTemp.textContent + ' Below minimum ' + minIntegrated + '% requirement';
+    displays.integratedStatus.textContent = 'NO - Below minimum ' + minIntegrated + '% requirement';
     displays.integratedStatus.style.color = '#dc2626';
   }
   
@@ -326,15 +309,13 @@ function updateProfessionalCosts() {
   const renovationBudget = parseFloat(inputs.restructuring.value);
   let total = 0;
   
-  const euroSymbol = getEuroSymbol();
-  
   // Notary fees
   if (document.getElementById('cost-notaryFees').checked) {
     const cost = Math.min(Math.max(propertyPrice * 0.02, 1500), 15000);
     document.getElementById('value-notaryFees').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-notaryFees').textContent = euroSymbol + '0';
+    document.getElementById('value-notaryFees').textContent = '0';
   }
   
   // Legal fees
@@ -343,7 +324,7 @@ function updateProfessionalCosts() {
     document.getElementById('value-legalFees').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-legalFees').textContent = euroSymbol + '0';
+    document.getElementById('value-legalFees').textContent = '0';
   }
   
   // Architect fees
@@ -352,7 +333,7 @@ function updateProfessionalCosts() {
     document.getElementById('value-architectFees').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-architectFees').textContent = euroSymbol + '0';
+    document.getElementById('value-architectFees').textContent = '0';
   }
   
   // Permits
@@ -361,7 +342,7 @@ function updateProfessionalCosts() {
     document.getElementById('value-permitCosts').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-permitCosts').textContent = euroSymbol + '0';
+    document.getElementById('value-permitCosts').textContent = '0';
   }
   
   // Project management
@@ -370,7 +351,7 @@ function updateProfessionalCosts() {
     document.getElementById('value-projectManagement').textContent = formatCurrency(cost);
     total += cost;
   } else {
-    document.getElementById('value-projectManagement').textContent = euroSymbol + '0';
+    document.getElementById('value-projectManagement').textContent = '0';
   }
   
   document.getElementById('total-professional-costs').textContent = formatCurrency(total);
@@ -484,7 +465,6 @@ function generatePDFReport(userData) {
   const data = calculationResults;
   
   // Add content to PDF
-  const euroSymbol = getEuroSymbol();
   
   // Colors
   const primaryGreen = [16, 185, 129];
@@ -554,14 +534,16 @@ function generatePDFReport(userData) {
   doc.text('Your Investment Opportunity', 105, 240, { align: 'center' });
   
   doc.setFontSize(28);
-  doc.text(euroSymbol + Math.round(data.miniPiaGrant).toLocaleString(), 105, 255, { align: 'center' });
+  doc.text(Math.round(data.miniPiaGrant).toLocaleString(), 105, 255, { align: 'center' });
   
   doc.setFontSize(14);
   doc.setFont('helvetica', 'normal');
   doc.text('in Mini PIA Turismo Grants Available', 105, 265, { align: 'center' });
   
-  // Continue with more pages...
-  // [Rest of PDF generation code continues as before but using euroSymbol variable]
+  // Add currency notice
+  doc.setFontSize(12);
+  doc.setTextColor(150, 75, 0);
+  doc.text('All amounts are in Euros (EUR)', 105, 280, { align: 'center' });
   
   // Save PDF
   doc.save('InvestiScope_Report_' + userData.name.replace(/\s+/g, '_') + '.pdf');
@@ -574,7 +556,8 @@ window.sendWhatsAppDirect = function() {
     return;
   }
   
-  const message = '🏠 INVESTISCOPE™ CLASSIC REPORT\n\n' +
+  const message = '🏠 INVESTISCOPE™ CLASSIC REPORT\n' +
+    '(All amounts in EUR)\n\n' +
     '📊 PROJECT BREAKDOWN\n' +
     'Total Project: ' + formatCurrency(calculationResults.totalProject) + '\n' +
     '• Total Eligible: ' + formatCurrency(calculationResults.totalEligible) + '\n' +
@@ -600,7 +583,7 @@ window.sendWhatsAppDirect = function() {
     '• Notary & Legal: ' + formatCurrency(calculationResults.notaryFees) + '\n' +
     '• Consulting: ' + formatCurrency(calculationResults.consultingFees) + '\n\n' +
     '📈 KEY METRICS\n' +
-    '• Grant Rate: ' + data.grantRate + '% of eligible costs\n' +
+    '• Grant Rate: ' + calculationResults.grantRate + '% of eligible costs\n' +
     '• Tax Credit: 15% of eligible costs\n' +
     '• Integrated Components: ' + calculationResults.integratedPercent.toFixed(1) + '%\n' +
     '• Professional Costs: ' + formatCurrency(calculationResults.professionalCosts || 0) + '\n\n' +
